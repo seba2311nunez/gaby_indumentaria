@@ -58,7 +58,11 @@ include("Conectar.inc");
 							Listado de pedidos
 						</div>
 						<div class="row">
-							<hr>
+							<br>
+							<a class="btn btn-outline-success btn-sm" id="btnNuevoPedido" style="margin: 10px;" data-toggle="modal" data-target="#myModal">
+								<i class="fas fa-plus"></i> Nuevo pedido
+							</a>
+							<br>
 							<table id="tabPedido" class="table" style="margin: 10px;">
 								<thead>
 									<tr>
@@ -90,7 +94,7 @@ include("Conectar.inc");
 													<td>$d->fecha</td>
 													<td style='text-align: center;'>$d->q</td>
 													<td>
-														<a class='btn btn-xs btn-info btn-verPedido' data-id_pedido='$d->id' >Ver</a>
+														<a class='btn btn-xs btn-info btn-verPedido btn-sm' data-id_pedido='$d->id' >Ver</a>
 													</td>
 												</tr>";
 
@@ -129,6 +133,46 @@ include("Conectar.inc");
 				</div>
 			</div>
 			
+			<!-- Modal -->
+			<div class="modal fade" id="myModal" role="dialog">
+				<div class="modal-dialog modal-lg">
+				  <div class="modal-content">
+				    <div class="modal-header">
+				    	<h4 >Cargando nuevo pedido</h4>
+				      	<button type="button" class="close " data-dismiss="modal">&times;</button>
+				      
+				    </div>
+				    <div class="modal-body">
+				      <table>
+				      	<tr>
+				      		<th>Modelo</th>
+				      		<td>
+				      			<input type="text" name="modelo" id="modelo">
+				      		</td>
+				      	</tr>
+				      	<tr>
+				      		<th>Color</th>
+				      		<td>
+				      			<input type="text" name="color" id="color">
+				      		</td>
+				      	</tr>
+				      	<tr>
+				      		<th>Precio mayorista</th>
+				      		<td>
+				      			<input type="text" name="precio" id="precio">
+				      		</td>
+				      	</tr>
+				      </table>
+
+				    </div>
+				    <div class="modal-footer">
+				      <button type="button" class="btn btn-warning" data-dismiss="modal" id="btnGuardar">Guardar</button>
+				      <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarModal">Close</button>
+				    </div>
+				  </div>
+				</div>
+			</div>
+			<!-- FIN Modal -->
 
 		</div>
 		<script>
