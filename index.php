@@ -59,7 +59,7 @@ include("Conectar.inc");
 						</div>
 						<div class="row">
 							<br>
-							<a class="btn btn-outline-success btn-sm" id="btnNuevoPedido" style="margin: 10px;" data-toggle="modal" data-target="#myModal">
+							<a class="btn btn-outline-success btn-sm" id="btnNuevoPedido" style="margin: 10px;" >
 								<i class="fas fa-plus"></i> Nuevo pedido
 							</a>
 							<br>
@@ -67,10 +67,11 @@ include("Conectar.inc");
 								<thead>
 									<tr>
 										<th>Id</th>
+										<th></th>
 										<th>Estado</th>
 										<th>Fecha</th>
 										<th>Cantidad de pedidos</th>
-										<th></th>
+										
 									</tr>
 								</thead>
 								<tbody>
@@ -78,11 +79,12 @@ include("Conectar.inc");
 										$sql = "SELECT p.id,p.estado,DATE_FORMAT(p.fecha,'%d-%m-%Y') AS fecha,
 														MID(GROUP_CONCAT(DISTINCT a.modelo,'-',a.color),100) AS articulos,
 														GROUP_CONCAT(DISTINCT pt.cliente) AS clientes,
-														COUNT(*) AS q
+														COALESCE(SUM(IF(pt.id IS NULL,0,1)),0) AS q
 													FROM pedido p
-													JOIN pedido_item pt ON p.id=pt.id_pedido 
-													JOIN articulo a ON pt.id_articulo=a.id 
-													GROUP BY p.id";
+													LEFT JOIN pedido_item pt ON p.id=pt.id_pedido 
+													LEFT JOIN articulo a ON pt.id_articulo=a.id 
+													GROUP BY p.id 
+													ORDER BY p.fecha DESC";
 
 										$rs = mysql_query($sql) or die(mysql_error());
 
@@ -90,12 +92,20 @@ include("Conectar.inc");
 
 											echo "<tr>
 													<td>$d->id</td>
+													<td>														
+														<div class='dropdown'>
+														    <button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'></button>      
+														    
+														    <div class='dropdown-menu'>
+														      <a class='dropdown-item btn-verPedido' data-id_pedido='$d->id'>Ver</a>
+														      <div class='dropdown-divider'></div>
+														      <a class='dropdown-item btn-cerrarPedido' data-id_pedido='$d->id'>Cerrar pedido</a>
+														    </div>
+														 </div>		
+													</td>
 													<td>$d->estado</td>
 													<td>$d->fecha</td>
-													<td style='text-align: center;'>$d->q</td>
-													<td>
-														<a class='btn btn-xs btn-info btn-verPedido btn-sm' data-id_pedido='$d->id' >Ver</a>
-													</td>
+													<td style='text-align: center;'>$d->q</td>													
 												</tr>";
 
 										}
@@ -108,11 +118,17 @@ include("Conectar.inc");
 					</div>
 				</div>
 				<div class="col-md-6 col-lg-6 ">
-					<div class="x_panel">
+					<div class="x_panel" id="divFormPedido" style="display: none;">
 						<div class="tituloDiv">
 							Detalle del pedido
 						</div>
 						<div class="row">
+
+							<a class="btn btn-outline-warning btn-sm" id="btnNuevoPedidoItem" style="margin: 10px;" data-toggle="modal" data-target="#modalPedidoItem">
+								<i class="fas fa-plus"></i> Nuevo pedido para cliente
+							</a>
+							<br>
+
 							<table class="table table-dark" id="tabPedidoItems" style="margin: 10px;">
 								<thead>
 									<tr>
@@ -134,7 +150,7 @@ include("Conectar.inc");
 			</div>
 			
 			<!-- Modal -->
-			<div class="modal fade" id="myModal" role="dialog">
+			<div class="modal fade" id="modalPedidoItem" role="dialog">
 				<div class="modal-dialog modal-lg">
 				  <div class="modal-content">
 				    <div class="modal-header">
@@ -143,31 +159,50 @@ include("Conectar.inc");
 				      
 				    </div>
 				    <div class="modal-body">
-				      <table>
-				      	<tr>
-				      		<th>Modelo</th>
-				      		<td>
-				      			<input type="text" name="modelo" id="modelo">
-				      		</td>
-				      	</tr>
-				      	<tr>
-				      		<th>Color</th>
-				      		<td>
-				      			<input type="text" name="color" id="color">
-				      		</td>
-				      	</tr>
-				      	<tr>
-				      		<th>Precio mayorista</th>
-				      		<td>
-				      			<input type="text" name="precio" id="precio">
-				      		</td>
-				      	</tr>
-				      </table>
-
+				    	<input type="hidden" id="id_pedido">
+						<table id="tabPedidoCliente" class="table">
+							<tr>
+								<th>Modelo</th>
+								<td>				      			
+									<select name="modelo" id="modelo"></select>			  
+								</td>
+							</tr>
+							<tr>
+								<th>Precio</th>
+								<td>
+									<input type="number" name="precio_may" id="precio_may" step="0.01" title="Es editable por si es necesario aplicar descuento">
+								</td>
+							</tr>
+							<tr>
+								<th>Cantidad</th>
+								<td>
+									<input type="number" name="cantidad" id="cantidad" step="1" value="1">
+								</td>
+							</tr>
+							<tr>
+								<th>Subtotal</th>
+								<td>
+									<input type="number" name="subtotal" id="subtotal" step="1" value="1" disabled>
+								</td>
+							</tr>
+							<tr>
+								<th>Cliente</th>
+								<td>
+									<input type="text" name="cliente" id="cliente">
+								</td>
+							</tr>
+							<tr>
+								<th>Anotacion</th>
+								<td>
+									<textarea class="form-control" id="observacion"></textarea>
+								</td>
+							</tr>
+						</table>
+				      	<br>				      
 				    </div>
 				    <div class="modal-footer">
-				      <button type="button" class="btn btn-warning" data-dismiss="modal" id="btnGuardar">Guardar</button>
-				      <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarModal">Close</button>
+				      <button type="button" class="btn btn-warning" data-dismiss="modal" id="btnGuardarItem">Guardar</button>
+				      <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarModal">Cerrar</button>
 				    </div>
 				  </div>
 				</div>
@@ -178,38 +213,200 @@ include("Conectar.inc");
 		<script>
 			$(function(){
 				
-				$('#tabPedido').on('click','.btn-verPedido',function(){
+				$('#tabPedidoCliente input').addClass('input-sm');
 
-					$("#tabPedidoItems tbody").html(""); 
-					$("#tabPedidoItems tbody").html("<i class='fas fa-spinner fa-spin fa-2x'></i>");
+				//select_articulos
+				$.getJSON('ajax.php',
+							{ parametro: "select_articulos" },						       				
+							function(data){ 
+								
+								for(var i=0; i<=data.length-1 ;i++){
+								
+									$("#modelo").append("<option value="+data[i]['id']+" data-precio_may="+data[i]['precio_venta']+">"+data[i]['modelos']+"</option>") ;	
 
-					console.log( $(this).data('id_pedido') )
+								}	
 
-					$.getJSON('ajax.php',
-								{ parametro: "ver_pedido", id_pedido: $(this).data('id_pedido') },						       				
-								function(data){ 
+							}//fin function data
+
+				);//fin getjson select_articulos
+
+				$("#tabPedidoCliente").on('change blur','#modelo',function(){
+					
+					$('#precio_may').val( $('#modelo option:selected').data('precio_may') );
+					$('#subtotal').val( $('#cantidad').val()*$('#precio_may').val() );
+				})
+
+				$("#tabPedidoCliente").on('change blur','#cantidad',function(){
+					
+					$('#subtotal').val( $('#cantidad').val()*$('#precio_may').val() );
+				})
+				//subtotal
+
+				$('#btnNuevoPedido').on('click',function(){
+
+					var txt;
+					var r = confirm("Seguro ?");
+					if (r == true) {
+					  	var datos = {
+							"parametro": "nuevo_pedido"
+						};
+
+						$.ajax({
+
+							url: 'ajax.php',
+							type: 'get',
+							data: datos,
+							success: function(data){						
+								
+								if(data=="ok"){
+									alert('El pedido fue creado.');
+									window.location.reload();
+								}
+								else{
+									console.log(data);
+								}
+
+							}
+						})
+					}// FIN confirm 
+
+				})
+
+				$('#btnGuardarItem').on('click',function(){
+
+					var txt;
+					var r = confirm("Seguro ?");
+					if (r == true) {
+
+						if($('#subtotal').val()!=""){
+
+							var datos = {
+								"parametro": "grabar_item_pedido",
+								"id_pedido": $('#id_pedido').val(),
+								"id_articulo": $('#modelo option:selected').val(),
+								"cantidad": $('#cantidad').val(),
+								"precio": $('#subtotal').val(),
+								"cliente": $('#cliente').val(),
+								"observacion": $('#observacion').val()
+							};
+
+							$.ajax({
+
+								url: 'ajax.php',
+								type: 'get',
+								data: datos,
+								success: function(data){						
 									
-									$("#tabPedidoItems tbody").html(""); 
+									if(data=="ok"){
+
+										alert('Agregado con exito!');
+										verPedidoItems($('#id_pedido').val());
+
+									}
+									else{
+										console.log(data);
+									}
+								}
+							})
+
+						}// FIN subtotal
+				  	
+
+					}// FIN confirm 
+
+				})
+
+
+				// btn-verPedido
+				$('#tabPedido').on('click','.btn-verPedido',function(){
+					var id_pedido = $(this).data('id_pedido');
+					$('#id_pedido').val(id_pedido);
+					verPedidoItems(id_pedido);
+				})// Fin verPedido
+
+				//btn-cerrarPedido
+				$('#tabPedido').on('click','.btn-cerrarPedido',function(){
+
+					var txt;
+					var r = confirm("Confirma ?");
+					if (r == true) {
+					  	var datos = {
+							"parametro": "cambiar_estado",
+							"id_pedido": $(this).data('id_pedido')
+						};
+
+						$.ajax({
+
+							url: 'ajax.php',
+							type: 'get',
+							data: datos,
+							success: function(data){						
+								
+								if(data=="ok"){
+									alert('El pedido fue cerrado.');
+									window.location.reload();
+								}
+								else{
+									console.log(data);
+								}
+
+							}
+						})
+					}// FIN confirm 			
+
+				})//FIN btn-cerrarPedido
+
+			})
+
+			function verPedidoItems(id_pedido){
+
+				console.log('ver pedido: '+id_pedido)
+
+				$('#divFormPedido').css('display','none');
+
+				$("#tabPedidoItems tbody").html(""); 
+				$("#tabPedidoItems tbody").html("<i class='fas fa-spinner fa-spin fa-2x'></i>");
+
+				$.getJSON('ajax.php',
+							{ parametro: "ver_pedido", id_pedido: id_pedido },						       				
+							function(data){ 
+								
+								$('#divFormPedido').css('display','block');
+
+								$("#tabPedidoItems tbody").html(""); 
+
+								if(data.length==0){
+
+									$("#tabPedidoItems tbody").append("<tr>"																			
+																			+"<td colspan=8>No se encontraron resultados</td>"			
+																		+"</tr>") ;	
+								}
+								else{
 
 									for(var i=0; i<=data.length-1 ;i++){
-									
-										$("#tabPedidoItems tbody").append("<tr>"																							+"<td>"+(i+1)+"</td>"
+								
+										$("#tabPedidoItems tbody").append("<tr>"																										+"<td>"+(i+1)+"</td>"
 																			+"<td>"+data[i]['modelo']+"</td>"
 																			+"<td>"+data[i]['color']+"</td>"
 																			+"<td>"+data[i]['fec_pedido']+"</td>"
 																			+"<td>"+data[i]['cliente']+"</td>"
 																			+"<td>"+data[i]['cantidad']+"</td>"
 																			+"<td>"+data[i]['precio']+"</td>"
-																			+"<td>"+data[i]['pagado']+"</td>"																      				
+																			+"<td>"+data[i]['pagado']+"</td>"	
 																		+"</tr>") ;		
-									}	
-								}//fin function data
+									}//FIN FOR
 
-					);//fin getjson
-					
-				})
+									$('#divFormPedido').focus();	
 
-			})
+								}
+
+								
+							}//fin function data
+
+				);//fin getjson
+			
+			}
+
 		</script>
 	</body>
 </html>

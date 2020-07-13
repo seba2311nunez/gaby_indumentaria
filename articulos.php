@@ -103,43 +103,43 @@ include("Conectar.inc");
 
 			<!-- Modal -->
 			<div class="modal fade" id="myModal" role="dialog">
-			<div class="modal-dialog modal-sm">
-			  <div class="modal-content">
-			    <div class="modal-header">
-			      <button type="button" class="close" data-dismiss="modal">&times;</button>
-			      <h4 class="modal-title">Cargando nuevo articulo</h4>
-			    </div>
-			    <div class="modal-body">
-			      <table>
-			      	<tr>
-			      		<th>Modelo</th>
-			      		<td>
-			      			<input type="text" name="modelo" id="modelo">
-			      		</td>
-			      	</tr>
-			      	<tr>
-			      		<th>Color</th>
-			      		<td>
-			      			<input type="text" name="color" id="color">
-			      		</td>
-			      	</tr>
-			      	<tr>
-			      		<th>Precio mayorista</th>
-			      		<td>
-			      			<input type="text" name="precio" id="precio">
-			      		</td>
-			      	</tr>
-			      </table>
+				<div class="modal-dialog modal-sm">
+				  <div class="modal-content">
+				    <div class="modal-header">
+				      <button type="button" class="close" data-dismiss="modal">&times;</button>
+				      <h4 class="modal-title">Cargando nuevo articulo</h4>
+				    </div>
+				    <div class="modal-body">
+				      <table>
+				      	<tr>
+				      		<th>Modelo</th>
+				      		<td>
+				      			<input type="text" name="modelo" id="modelo">
+				      		</td>
+				      	</tr>
+				      	<tr>
+				      		<th>Color</th>
+				      		<td>
+				      			<input type="text" name="color" id="color">
+				      		</td>
+				      	</tr>
+				      	<tr>
+				      		<th>Precio mayorista</th>
+				      		<td>
+				      			<input type="text" name="precio" id="precio">
+				      		</td>
+				      	</tr>
+				      </table>
 
-			    </div>
-			    <div class="modal-footer">
-			      <button type="button" class="btn btn-warning" data-dismiss="modal" id="btnGuardar">Guardar</button>
-			      <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarModal">Close</button>
-			    </div>
-			  </div>
+				    </div>
+				    <div class="modal-footer">
+				      <button type="button" class="btn btn-warning" data-dismiss="modal" id="btnGuardar">Guardar</button>
+				      <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarModal">Close</button>
+				    </div>
+				  </div>
+				</div>
 			</div>
-			</div>
-
+			<!-- FIN Modal -->
 
 		</div>
 		<script>

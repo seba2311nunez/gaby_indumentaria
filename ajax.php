@@ -2,15 +2,15 @@
 include("Conectar.inc");
 
 switch ($parametro) {
-	case 'grabar_articulo':
+	
+	//Funciones de pedidos
 
-		$insert = "INSERT INTO articulo(modelo,color,precio_mayo)
-						VALUES (UPPER('$modelo'),UPPER('$color'),'$precio')";
-
-		mysql_query($insert) or die(mysql_error()."<br>".$insert);
-
-		echo "ok";
+	case 'nuevo_pedido':
 		
+		$insert = "INSERT INTO pedido(fecha,estado) VALUES (CURDATE(),'abierto') ";
+		mysql_query($insert);
+		echo "ok";
+
 		break;
 
 	case 'ver_pedido':
@@ -46,6 +46,64 @@ switch ($parametro) {
 
 			break;	
 	
+	case 'cambiar_estado':
+		
+		$update_estado = "UPDATE pedido SET estado='cerrado' WHERE id = $id_pedido ";
+
+		mysql_query($update_estado) or die(mysql_error()."<br>".$update_estado);
+
+		echo "ok";
+
+		break;
+
+	case 'select_articulos':
+
+		$art = "SELECT id,CONCAT(modelo,' - ',color,' | $',precio_venta) AS modelos,precio_venta
+					FROM articulo
+					WHERE estado='alta'	";
+
+		$result=mysql_query($art) or die(mysql_error()."<br>".$art);
+
+		$json = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			
+		    $json[] = array(
+					'id' => $row['id'],	
+					'modelos' => $row['modelos'],						        		
+					'precio_venta' => $row['precio_venta']
+					       
+		      );
+		}
+
+		echo json_encode($json);
+
+		break;
+
+	case 'grabar_item_pedido':
+		
+		$insert = "INSERT INTO pedido_item(id_pedido, id_articulo,cantidad,precio,cliente,observacion)
+						VALUES ($id_pedido,$id_articulo,$cantidad,'$precio','$cliente','$observacion')";
+
+		mysql_query($insert) or die(mysql_error()."<br> \n ".$insert);
+
+		echo "ok";
+
+		break;
+
+	//Funciones de articulos
+
+	case 'grabar_articulo':
+
+		$insert = "INSERT INTO articulo(modelo,color,precio_mayo)
+						VALUES (UPPER('$modelo'),UPPER('$color'),'$precio')";
+
+		mysql_query($insert) or die(mysql_error()."<br>".$insert);
+
+		echo "ok";
+		
+		break;
+
 	default:
 		# code...
 		break;
